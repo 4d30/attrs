@@ -17,10 +17,10 @@ def _get_handle(value: str, attrs_root: str):
 
     if handle is None:
         os.makedirs(attrs_root, exist_ok=True)
-        value_id = _value_id(value)
+        this_value_id = value_id(value)
         path = os.path.join(
             attrs_root,
-            f"{value_id}_today.bin",
+            f"{this_value_id}_today.bin",
         )
         handle = open(path, "ab")
         _HANDLES[key] = handle
@@ -37,7 +37,7 @@ def _cid_bytes(cid: str) -> bytes:
     return value
 
 
-def _value_id(value: str) -> str:
+def value_id(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
@@ -62,8 +62,8 @@ def get(
     if attrs_root is None:
         raise ValueError("attrs_root is not configured")
 
-    value_id = _value_id(value)
-    path = os.path.join(attrs_root, f"{value_id}.bin")
+    this_value_id = value_id(value)
+    path = os.path.join(attrs_root, f"{this_value_id}.bin")
 
     if not os.path.exists(path):
         return
@@ -77,18 +77,18 @@ def get(
 
 
 def _sort_value(
-    value_id: str,
+    this_value_id: str,
     attrs_root: str,
 ) -> None:
     """Sort and deduplicate today's posting list for a value."""
     today_path = os.path.join(
         attrs_root,
-        f"{value_id}_today.bin",
+        f"{this_value_id}_today.bin",
     )
 
     sorted_path = os.path.join(
         attrs_root,
-        f"{value_id}_sorted.bin",
+        f"{this_value_id}_sorted.bin",
     )
 
     if not os.path.exists(today_path):
@@ -149,24 +149,24 @@ def _merge_files(
 
 
 def _merge_value(
-    value_id: str,
+    this_value_id: str,
     attrs_root: str,
 ) -> None:
     """Merge today's sorted posting list into the persistent list."""
 
     today_path = os.path.join(
         attrs_root,
-        f"{value_id}_sorted.bin",
+        f"{this_value_id}_sorted.bin",
     )
 
     existing_path = os.path.join(
         attrs_root,
-        f"{value_id}.bin",
+        f"{this_value_id}.bin",
     )
 
     merged_path = os.path.join(
         attrs_root,
-        f"{value_id}.new.bin",
+        f"{this_value_id}.new.bin",
     )
 
     if not os.path.exists(today_path):
@@ -199,20 +199,20 @@ def build(attrs_root: str = ATTRS_ROOT) -> None:
         if filename.endswith("_today.bin"):
             value_ids.add(filename[:-10])
 
-    for value_id in value_ids:
-        _sort_value(value_id, attrs_root)
+    for this_value_id in value_ids:
+        _sort_value(this_value_id, attrs_root)
 
-    for value_id in value_ids:
-        _merge_value(value_id, attrs_root)
+    for this_value_id in value_ids:
+        _merge_value(this_value_id, attrs_root)
 
         today_path = os.path.join(
             attrs_root,
-            f"{value_id}_today.bin",
+            f"{this_value_id}_today.bin",
         )
 
         sorted_path = os.path.join(
             attrs_root,
-            f"{value_id}_sorted.bin",
+            f"{this_value_id}_sorted.bin",
         )
 
         if os.path.exists(today_path):

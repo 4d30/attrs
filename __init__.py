@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .core import put, get, walk, build, close
+from .core import put, get, walk, build, close, value_id
 
 __all__ = [
     "put",
@@ -8,4 +8,5 @@ __all__ = [
     "walk",
     "build",
     "close",
+    "value_id",
 ]
